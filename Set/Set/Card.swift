@@ -8,18 +8,12 @@
 
 import Foundation
 
-struct Card {
+struct Card : Equatable{
     
     let shape: Int
     let number: Int
     let shading: Int
     let color: Int
     
-    init(shape: Int, number: Int, shading: Int, color: Int) {
-        self.shape = shape
-        self.number = number
-        self.shading = shading
-        self.color = color
-    }
-    
+
 }
