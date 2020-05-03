@@ -17,7 +17,7 @@ struct SetGame {
     
     var selectedCards = [Card]()
     
-    private var matchedCards = [Card]()
+ //   private var matchedCards = [Card]()
     
     var matchingSet: [Card]? {
         mutating get {
@@ -25,6 +25,17 @@ struct SetGame {
         }
     }
     
+    private var topOfDeckCard: Card? {
+        mutating get {
+            if topOfDeck < deck.count {
+                let cardToDeal = deck[topOfDeck]
+                topOfDeck += 1
+                return cardToDeal
+            } else {
+                return nil
+            }
+        }
+    }
     
     mutating func chooseCard(at index: Int)
     {
@@ -49,21 +60,24 @@ struct SetGame {
     
     mutating func dealThreeCards()
     {
-        if topOfDeck + 3 < deck.count {
-            if isMatch() {
-                matchedCards.append(contentsOf: selectedCards)
-                for selectedCard in selectedCards {
-                    if let indexOfSelectedCard = cardsInPlay.firstIndex(of: selectedCard) {
-                        cardsInPlay[indexOfSelectedCard] = getTopCardOfDeck()
+        if isMatch() {
+ //           matchedCards.append(contentsOf: selectedCards)
+            for selectedCard in selectedCards {
+                if let indexOfSelectedCard = cardsInPlay.firstIndex(of: selectedCard) {
+                    if let nextCard = topOfDeckCard {
+                        cardsInPlay[indexOfSelectedCard] = nextCard
+                    } else {
+                        cardsInPlay.remove(at: indexOfSelectedCard)
                     }
-                    selectedCards = [Card]()
                 }
-            } else {
-                for _ in 0..<3 {
-                    cardsInPlay.append(getTopCardOfDeck())
+                selectedCards = [Card]()
+            }
+        } else {
+            for _ in 0..<3 {
+                if let nextCard = topOfDeckCard {
+                    cardsInPlay.append(nextCard)
                 }
             }
-            
         }
     }
     
@@ -74,14 +88,11 @@ struct SetGame {
         if selectedCards.count == 3 {
             let card1 = selectedCards[0], card2 = selectedCards[1], card3 = selectedCards[2]
             
-            if card1.color.tripleEquals(value2: card2.color, value3: card3.color) || card1.color.tripleNotEquals(value2: card2.color, value3: card3.color) {
-                if card1.shape.tripleEquals(value2: card2.shape, value3: card3.shape) || card1.shape.tripleNotEquals(value2: card2.shape, value3: card3.shape) {
-                    if card1.number.tripleEquals(value2: card2.number, value3: card3.number) || card1.number.tripleNotEquals(value2: card2.number, value3: card3.number) {
-                        if card1.shading.tripleEquals(value2: card2.shading, value3: card3.shading) || card1.shading.tripleNotEquals(value2: card2.shading, value3: card3.shading) {
-                            validMatch = true
-                        }
-                    }
-                }
+            if card1.color.tripleEquals(value2: card2.color, value3: card3.color) || card1.color.tripleNotEquals(value2: card2.color, value3: card3.color),
+                card1.shape.tripleEquals(value2: card2.shape, value3: card3.shape) || card1.shape.tripleNotEquals(value2: card2.shape, value3: card3.shape),
+                card1.number.tripleEquals(value2: card2.number, value3: card3.number) || card1.number.tripleNotEquals(value2: card2.number, value3: card3.number),
+                card1.shading.tripleEquals(value2: card2.shading, value3: card3.shading) || card1.shading.tripleNotEquals(value2: card2.shading, value3: card3.shading) {
+                    validMatch = true
             }
         }
         
@@ -89,16 +100,12 @@ struct SetGame {
         
     }
     
-    mutating private func getTopCardOfDeck() -> Card {
-        let cardToDeal = deck[topOfDeck]
-        topOfDeck += 1
-        return cardToDeal
-    }
-    
     // MARK: initialization
     init(numberOfCardsDealt: Int)
     {
         assert(numberOfCardsDealt > 0, "SetGame.init(numberOfCardsDealt: \(numberOfCardsDealt)): can't start with negative number of cards")
+        assert(numberOfCardsDealt <= 81, "SetGame.init(numberOfCardsDealt: \(numberOfCardsDealt)): can't start with more cards than the deck contains")
+        
         var currentCardIndex = 0
         // each card has 4 features, and each feature has 4 unique options. Total of 81 cards, each unique
         for shape in 1...4 {
@@ -115,7 +122,7 @@ struct SetGame {
         deck.shuffle()
         
         for dealtCard in 0..<numberOfCardsDealt {
-            cardsInPlay[dealtCard] = getTopCardOfDeck()
+            cardsInPlay[dealtCard] = topOfDeckCard!
         }
     }
 }
