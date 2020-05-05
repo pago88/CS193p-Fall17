@@ -106,14 +106,12 @@ struct SetGame {
         assert(numberOfCardsDealt > 0, "SetGame.init(numberOfCardsDealt: \(numberOfCardsDealt)): can't start with negative number of cards")
         assert(numberOfCardsDealt <= 81, "SetGame.init(numberOfCardsDealt: \(numberOfCardsDealt)): can't start with more cards than the deck contains")
         
-        var currentCardIndex = 0
         // each card has 4 features, and each feature has 4 unique options. Total of 81 cards, each unique
         for shape in 1...4 {
             for number in 1...4 {
                 for shading in 1...4 {
                     for color in 1...4 {
-                        deck[currentCardIndex] = Card(shape: shape, number: number, shading: shading, color: color)
-                        currentCardIndex += 1
+                        deck.append(Card(shape: shape, number: number, shading: shading, color: color))
                     }
                 }
             }
@@ -121,9 +119,8 @@ struct SetGame {
         
         deck.shuffle()
         
-        for dealtCard in 0..<numberOfCardsDealt {
-            cardsInPlay[dealtCard] = topOfDeckCard!
-        }
+        cardsInPlay.append(contentsOf: deck[0..<numberOfCardsDealt])
+        topOfDeck = numberOfCardsDealt
     }
 }
 
